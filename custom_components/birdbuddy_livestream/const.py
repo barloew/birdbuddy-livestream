@@ -141,10 +141,12 @@ PREVIEW_NONE: Final = "none"
 PREVIEW_LAST_FRAME: Final = "last_frame"
 PREVIEW_ENTITY: Final = "entity"
 PREVIEW_FILE: Final = "file"
+PREVIEW_POSTCARD: Final = "postcard"
 
 PREVIEW_SOURCES: Final = [
     PREVIEW_NONE,
     PREVIEW_LAST_FRAME,
+    PREVIEW_POSTCARD,
     PREVIEW_ENTITY,
     PREVIEW_FILE,
 ]
@@ -270,3 +272,25 @@ KEEPALIVE_MISSES_BEFORE_LOST: Final = 3
 # session is running.
 HEALTH_INTERVAL: Final = 30
 
+
+# --- Postcards ---------------------------------------------------------------
+
+# How many feed items to scan for the most recent bird. Postcards are
+# interleaved with invitations, likes and member changes, so one item is not
+# enough.
+POSTCARD_FEED_SIZE: Final = 25
+# How long a fetched postcard stays good. The feed is a cloud call, and birds
+# do not arrive every minute.
+POSTCARD_CACHE_TTL: Final = 300
+
+# Feed item types that carry a picture of a bird. Verified against pybirdbuddy
+# 0.1.0, which moved postcard collection server-side without changing these.
+POSTCARD_TYPES: Final = frozenset(
+    {
+        "FeedItemCollectedPostcard",
+        "FeedItemNewPostcard",
+        "FeedItemSpeciesSighting",
+        "FeedItemSpeciesUnlocked",
+        "FeedItemMysteryVisitorResolved",
+    }
+)

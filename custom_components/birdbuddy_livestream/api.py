@@ -14,6 +14,8 @@ from birdbuddy.client import BirdBuddy
 from .const import (
     ACTIVE_WITHOUT_URL_LIMIT,
     KEEPALIVE_MISSES_BEFORE_LOST,
+    POSTCARD_FEED_SIZE,
+    POSTCARD_TYPES,
     DEFAULT_START_TIMEOUT,
     NON_STREAMABLE_FEEDER_STATES,
     KEEPALIVE_INTERVAL,
@@ -33,6 +35,66 @@ LOGGER = logging.getLogger(__name__)
 
 class WatchingError(Exception):
     """The feeder could not set up the livestream."""
+
+
+@dataclass(slots=True)
+class Postcard:
+    """The most recent bird picture from the Bird Buddy feed."""
+
+    image_url: str
+    species: str | None
+    created_at: str | None
+
+
+def _first_image(node: dict) -> str | None:
+    """Pull an image URL out of a feed node.
+
+    Feed items carry their picture in different shapes: a list under "medias",
+    a single "media", or nothing at all. A clip falls back to its thumbnail,
+    since a still is what the card needs.
+    """
+    candidates: list[dict] = []
+
+    medias = node.get("medias")
+    if isinstance(medias, list):
+        candidates.extend(m for m in medias if isinstance(m, dict))
+
+    media = node.get("media")
+    if isinstance(media, dict):
+        candidates.append(media)
+
+    for item in candidates:
+        if item.get("__typename") == "MediaVideo":
+            if thumb := item.get("thumbnailUrl"):
+                return str(thumb)
+            continue
+        for key in ("contentUrl", "thumbnailUrl"):
+            if url := item.get(key):
+                return str(url)
+
+    return None
+
+
+def _species_name(node: dict) -> str | None:
+    """Pull a readable species name out of a feed node."""
+    species = node.get("species")
+    if isinstance(species, list):
+        for entry in species:
+            if isinstance(entry, dict) and (name := entry.get("name")):
+                return str(name)
+    elif isinstance(species, dict) and (name := species.get("name")):
+        return str(name)
+
+    # Sightings carry the species on the collection instead.
+    collection = node.get("collection")
+    if isinstance(collection, dict):
+        if name := collection.get("name"):
+            return str(name)
+        nested = collection.get("species")
+        if isinstance(nested, dict) and (name := nested.get("name")):
+            return str(name)
+
+    return None
 
 
 @dataclass(slots=True)
@@ -380,6 +442,54 @@ class BirdBuddyWatcher:
         if state is None:
             return True
         return state not in NON_STREAMABLE_FEEDER_STATES
+
+    # -- postcards ---------------------------------------------------------
+
+    async def async_latest_postcard(self) -> Postcard | None:
+        """Return the most recent bird seen at the feeder.
+
+        Read straight from the Bird Buddy feed rather than through another
+        integration, so this keeps working on its own.
+
+        The feed mixes bird pictures with invitations, likes and member
+        changes, so a page is scanned rather than just the newest entry.
+        """
+        try:
+            feed = await self._client.feed(first=POSTCARD_FEED_SIZE)
+        except Exception as err:  # noqa: BLE001
+            LOGGER.debug("Could not fetch the feed: %s", err)
+            return None
+
+        best: Postcard | None = None
+
+        for node in feed.nodes:
+            if node.get("__typename") not in POSTCARD_TYPES:
+                continue
+
+            image = _first_image(node)
+            if image is None:
+                continue
+
+            created = node.get("createdAt")
+            candidate = Postcard(
+                image_url=image,
+                species=_species_name(node),
+                created_at=created,
+            )
+
+            # Nodes arrive newest first, but the feed is not strictly ordered
+            # across types, so compare rather than take the first hit.
+            if best is None or (created or "") > (best.created_at or ""):
+                best = candidate
+
+        if best is None:
+            LOGGER.debug(
+                "No bird picture in the last %d feed items", POSTCARD_FEED_SIZE
+            )
+        else:
+            LOGGER.debug("Latest postcard: %s at %s", best.species, best.created_at)
+
+        return best
 
     # -- stopping ----------------------------------------------------------
 

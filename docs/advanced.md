@@ -234,6 +234,18 @@ The `last_frame` source keeps a still from the running stream, refreshed every
 held in memory only, so the preview is empty until the first successful stream
 after a restart.
 
+The `postcard` source reads the Bird Buddy feed directly through
+`client.feed()`. Feed items mix bird pictures with invitations, likes and member
+changes, so `POSTCARD_FEED_SIZE` items are scanned and the newest one carrying a
+picture wins. Five item types qualify: `FeedItemCollectedPostcard`,
+`FeedItemNewPostcard`, `FeedItemSpeciesSighting`, `FeedItemSpeciesUnlocked` and
+`FeedItemMysteryVisitorResolved`.
+
+Their shapes differ — a `medias` list, a single `media`, species on the item or
+on its `collection` — so extraction handles all of them and falls back to a
+clip's thumbnail. Results are cached for `POSTCARD_CACHE_TTL`, and the image is
+only re-downloaded when its URL changes.
+
 The `entity` source reads `entity_picture` from another entity. Absolute URLs
 are fetched directly; local `/api/...` paths need authentication and are signed
 with `async_sign_path` first.
@@ -342,6 +354,8 @@ Fixed timings, in `const.py`:
 | `STATE_POLL_INTERVAL` | 300 s | how often the feeder state is read while idle |
 | `HEALTH_INTERVAL` | 30 s | how often the go2rtc source is checked while streaming |
 | `KEEPALIVE_MISSES_BEFORE_LOST` | 3 | stateless keepalive replies tolerated |
+| `POSTCARD_FEED_SIZE` | 25 | feed items scanned for the latest bird |
+| `POSTCARD_CACHE_TTL` | 300 s | how long a fetched postcard stays good |
 | `LAST_FRAME_INTERVAL` | 60 s | how often to grab a still while streaming |
 | `SIGNED_URL_TTL` | 60 s | validity of a signed URL for another entity's picture |
 

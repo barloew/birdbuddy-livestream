@@ -150,7 +150,7 @@ list, and click **Configure** on that row.
 | go2rtc ffmpeg template | empty | For advanced use; leave empty |
 | Transcode to H.264 | on | Only relevant when using go2rtc |
 | Preview image | Last frame | What the card shows while nobody is watching |
-| Preview entity | empty | Used with "Latest postcard" |
+| Preview entity | empty | Used with another entity's picture |
 | Preview image file | empty | Used with "Image file" |
 | Show status on the preview | on | Writes "Waking up", "Live" and so on over the picture |
 | Stop when nobody is watching | off | Needs go2rtc; experimental, can cut off an active viewer |
@@ -170,9 +170,12 @@ it shows instead:
 - **Last frame of the previous stream** (default) — a still grabbed while you
   were last watching. Nothing to configure, but the card stays empty until you
   have watched once.
-- **Latest postcard** — point **Preview entity** at an entity that carries a
-  picture. The recent-visitor sensor from [ha-birdbuddy][ha-birdbuddy] is the
-  obvious choice: the card then shows the last bird that visited.
+- **Latest bird from your Bird Buddy feed** — the most recent bird that visited,
+  with its species written across the picture. Read straight from Bird Buddy, so
+  it needs no other integration. The species and timestamp also appear as
+  `last_visitor` and `last_visitor_at` attributes on the camera.
+- **Another entity's picture** — point **Preview entity** at any entity that
+  carries one, if you would rather use a different source.
 - **Image file** — a fixed photo. Put the full path in **Preview image file**,
   for example `/media/local/birdbuddy.jpg`. The folder has to be one Home
   Assistant is allowed to read.

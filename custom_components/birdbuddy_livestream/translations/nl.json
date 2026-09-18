@@ -102,7 +102,8 @@
         "none": "Geen",
         "last_frame": "Laatste beeld van de vorige stream",
         "entity": "Laatste postcard of andere entiteitsafbeelding",
-        "file": "Afbeeldingsbestand"
+        "file": "Afbeeldingsbestand",
+        "postcard": "Laatste vogel uit je Bird Buddy-feed"
       }
     }
   }

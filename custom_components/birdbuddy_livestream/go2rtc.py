@@ -211,11 +211,11 @@ class Go2RtcClient:
         try:
             async with self._session.get(url) as resp:
                 if resp.status >= 400:
-                    return None, 0
+                    return None, 0, None
                 data = await resp.json(content_type=None)
         except (aiohttp.ClientError, ValueError) as err:
             LOGGER.debug("Could not read status of stream %s: %s", name, err)
-            return None, 0
+            return None, 0, None
 
         payload = data or {}
         consumers = len(payload.get("consumers") or [])
@@ -229,9 +229,10 @@ class Go2RtcClient:
                 len(producers),
             )
         if not producers:
-            return None, consumers
+            return None, consumers, None
 
-        return int(producers[0].get("bytes_recv") or 0), consumers
+        first = producers[0]
+        return int(first.get("bytes_recv") or 0), consumers, first.get("id")
 
     async def async_park(self, name: str, source: str) -> None:
         """Point the stream at a harmless source after a session ends.

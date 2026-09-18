@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.3.1
+
+- Fix `ValueError: not enough values to unpack` every thirty seconds while
+  streaming. The go2rtc health check was changed to report the producer's
+  identity alongside the byte count, but two of its four return paths were left
+  returning the old pair
+
+## 1.3.0
+
+- New preview source: **Latest bird from your Bird Buddy feed**. The camera card
+  shows the most recent bird that visited, with its species written across it,
+  read straight from Bird Buddy
+- The camera exposes `last_visitor` and `last_visitor_at` attributes when that
+  preview source is selected
+
 ## 1.2.5
 
 - The holding pattern appears as soon as you open the stream, instead of after

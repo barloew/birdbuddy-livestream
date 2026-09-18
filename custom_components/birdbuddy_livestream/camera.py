@@ -162,7 +162,7 @@ class BirdBuddyCamera(Camera):
         # restart would wake the feeder.
         self._may_wake_feeder = False
         self._enabled = True
-        self._preview = PreviewProvider(hass, dict(entry.options))
+        self._preview = PreviewProvider(hass, dict(entry.options), watcher)
         self._status = STATUS_IDLE
         self._status_detail: str | None = None
         self._cancel_frame_grab: Any = None
@@ -275,11 +275,15 @@ class BirdBuddyCamera(Camera):
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Expose diagnostics that are handy from the UI."""
-        return {
+        attrs: dict[str, Any] = {
             "session_active": self._session_active,
             "starting": self._start_task is not None and not self._start_task.done(),
             "last_error": self._last_error,
         }
+        if species := self._preview.postcard_species:
+            attrs["last_visitor"] = species
+            attrs["last_visitor_at"] = self._preview.postcard_created_at
+        return attrs
 
     @callback
     def _set_status(self, status: str, detail: str | None = None) -> None:

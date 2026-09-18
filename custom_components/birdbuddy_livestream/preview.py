@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import io
 import logging
+import time
 from typing import Any
 
 import aiohttp
@@ -28,8 +29,11 @@ from .const import (
     PREVIEW_FILE,
     PREVIEW_LAST_FRAME,
     PREVIEW_NONE,
+    PREVIEW_POSTCARD,
+    POSTCARD_CACHE_TTL,
     SIGNED_URL_TTL,
     STATUS_ERROR,
+    STATUS_IDLE,
     STATUS_NOT_READY,
     STATUS_SLEEPING,
     STATUS_STREAMING,
@@ -68,13 +72,22 @@ FEEDER_STATE_TEXT: dict[str, str] = {
 class PreviewProvider:
     """Resolves and caches the preview image for one feeder."""
 
-    def __init__(self, hass: HomeAssistant, options: dict[str, Any]) -> None:
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        options: dict[str, Any],
+        watcher: Any = None,
+    ) -> None:
         """Initialise the provider."""
         self._hass = hass
         self._options = options
+        self._watcher = watcher
         self._last_frame: bytes | None = None
         self._cache: bytes | None = None
         self._cache_key: tuple | None = None
+        self._postcard: Any = None
+        self._postcard_bytes: bytes | None = None
+        self._postcard_fetched = 0.0
 
     def update_options(self, options: dict[str, Any]) -> None:
         """Apply new options and drop the cache."""
@@ -101,11 +114,20 @@ class PreviewProvider:
     def _overlay_enabled(self) -> bool:
         return bool(self._options.get(CONF_STATUS_OVERLAY, DEFAULT_STATUS_OVERLAY))
 
-    @staticmethod
-    def caption(status: str, detail: str | None = None) -> str | None:
+    def caption(self, status: str, detail: str | None = None) -> str | None:
         """Return the line to write across the preview, if any."""
         if detail and (text := FEEDER_STATE_TEXT.get(detail)):
             return text
+
+        # While nothing is happening, a postcard is better captioned with the
+        # bird on it than with nothing at all.
+        if (
+            status == STATUS_IDLE
+            and self._source == PREVIEW_POSTCARD
+            and (species := self.postcard_species)
+        ):
+            return species
+
         return OVERLAY_TEXT.get(status)
 
     async def async_image(
@@ -119,16 +141,17 @@ class PreviewProvider:
         if self._source == PREVIEW_NONE:
             return None
 
+        # Fetch first, so a postcard caption matches the picture below it.
+        base = await self._async_base_image()
+        if base is None:
+            return None
+
         text = self.caption(status, detail) if self._overlay_enabled else None
 
         # Only the caption varies between calls, so cache on that.
         key = (self._source, text)
         if self._cache is not None and self._cache_key == key:
             return self._cache
-
-        base = await self._async_base_image()
-        if base is None:
-            return None
 
         image = base
         if text:
@@ -164,10 +187,71 @@ class PreviewProvider:
                 LOGGER.warning("Could not read preview image %s: %s", path, err)
                 return None
 
+        if source == PREVIEW_POSTCARD:
+            return await self._async_postcard_image()
+
         if source == PREVIEW_ENTITY:
             return await self._async_entity_picture()
 
         return None
+
+    @property
+    def postcard_species(self) -> str | None:
+        """The species on the most recently fetched postcard, if any."""
+        return getattr(self._postcard, "species", None)
+
+    @property
+    def postcard_created_at(self) -> str | None:
+        """When that postcard was taken."""
+        return getattr(self._postcard, "created_at", None)
+
+    async def _async_postcard_image(self) -> bytes | None:
+        """Fetch the newest bird picture from the Bird Buddy feed.
+
+        Cached, because the feed is a cloud round trip and birds do not arrive
+        every minute.
+        """
+        if self._watcher is None:
+            return None
+
+        now = time.monotonic()
+        if (
+            self._postcard_bytes is not None
+            and now - self._postcard_fetched < POSTCARD_CACHE_TTL
+        ):
+            return self._postcard_bytes
+
+        postcard = await self._watcher.async_latest_postcard()
+        if postcard is None:
+            return self._postcard_bytes
+
+        # Only re-download when the picture actually changed.
+        if (
+            self._postcard is not None
+            and self._postcard_bytes is not None
+            and postcard.image_url == self._postcard.image_url
+        ):
+            self._postcard_fetched = now
+            return self._postcard_bytes
+
+        session = async_get_clientsession(self._hass)
+        try:
+            async with session.get(postcard.image_url) as resp:
+                if resp.status >= 400:
+                    LOGGER.debug("Postcard image returned %s", resp.status)
+                    return self._postcard_bytes
+                data = await resp.read()
+        except aiohttp.ClientError as err:
+            LOGGER.debug("Could not fetch the postcard image: %s", err)
+            return self._postcard_bytes
+
+        self._postcard = postcard
+        self._postcard_bytes = data
+        self._postcard_fetched = now
+        self._cache = None
+        self._cache_key = None
+        LOGGER.debug("Fetched a postcard of %s", postcard.species)
+        return data
 
     async def _async_entity_picture(self) -> bytes | None:
         """Fetch the picture of another entity, such as a recent-visitor sensor."""

@@ -102,7 +102,8 @@
         "none": "None",
         "last_frame": "Last frame of the previous stream",
         "entity": "Latest postcard or other entity picture",
-        "file": "Image file"
+        "file": "Image file",
+        "postcard": "Latest bird from your Bird Buddy feed"
       }
     }
   }
