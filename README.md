@@ -352,7 +352,7 @@ Hansche, and [go2rtc][go2rtc] by AlexxIT.
 Not affiliated with or endorsed by Bird Buddy.
 
 [my-ha-badge]: https://my.home-assistant.io/badges/hacs_repository.svg
-[my-ha-url]: https://my.home-assistant.io/redirect/hacs_repository/?owner=barloew&repository=birdbuddy_livestream&category=integration
+[my-ha-url]: https://my.home-assistant.io/redirect/hacs_repository/?owner=barloew&repository=birdbuddy-livestream&category=integration
 [hacs-badge]: https://img.shields.io/badge/HACS-Custom-41BDF5.svg
 [hacs-url]: https://github.com/hacs/integration
 [validate-badge]: https://github.com/barloew/birdbuddy-livestream/actions/workflows/validate.yml/badge.svg
