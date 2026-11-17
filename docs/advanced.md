@@ -74,7 +74,7 @@ integration holds no session, and an address-less `ACTIVE` gives up after
 Only the stop, never `watchingCooldown`. Cooldown belongs at the end of a
 session; sending it just before a start puts the feeder into a cooldown it then
 refuses to stream out of, answering `WatchingFailedResult` with
-`failedReason: UNSPECIFIED` on every subsequent attempt. The integration serialises all access behind a lock and
+`failedReason: UNSPECIFIED` on every subsequent attempt. The integration serializes all access behind a lock and
 stops a running session before starting another. Watching in the mobile app at
 the same time will fight over the same session.
 
@@ -177,7 +177,7 @@ stream; it only restarts its player when the entity itself changes.
 Two configurations avoid the swap entirely. Continuous mode keeps the session
 running, so `stream_source()` returns the live address immediately and no
 placeholder is ever used. Turning `instant_start` off restores the two-click
-behaviour, which also yields one uninterrupted stream.
+behavior, which also yields one uninterrupted stream.
 The placeholder source is configurable, because go2rtc's virtual-source syntax
 may differ between versions. The default is
 `ffmpeg:virtual?video=testsrc&size=1536x2048#video=h264`.
@@ -193,7 +193,7 @@ in the log, the swap worked and the browser's player is the remaining problem.
 Clicking again is instant at that point, because the session is already live.
 
 Registering a stream through the go2rtc API succeeds even when the source is
-nonsense, so the integration probes `/api/frame.jpeg?src=<name>` afterwards.
+nonsense, so the integration probes `/api/frame.jpeg?src=<name>` afterward.
 Once a source string has produced a frame it is not probed again, because the
 probe costs seconds out of the ten Home Assistant allows.
 That forces go2rtc to start the source; if no frame comes back, the placeholder
@@ -294,7 +294,7 @@ Deliberately a blocklist. An earlier version listed the permitted states
 instead, and so refused to stream a feeder reporting `OUT_OF_FEEDER` — which
 the Bird Buddy app streamed from without complaint. The server is the authority
 on whether a stream can start; the feeder state serves to explain a refusal,
-not to pre-empt one. An unrecognised state is therefore attempted. The status sensor then reports `sleeping` with the raw
+not to pre-empt one. An unrecognized state is therefore attempted. The status sensor then reports `sleeping` with the raw
 state in its `detail` attribute, and the next attempt waits out
 `retry_interval`.
 
@@ -430,7 +430,7 @@ ffmpeg:
 
 and enter `bb_hls` in the ffmpeg template option.
 
-Check the go2rtc log the first time. An unrecognised template name makes ffmpeg
+Check the go2rtc log the first time. An unrecognized template name makes ffmpeg
 treat it as an output filename:
 
 ```
