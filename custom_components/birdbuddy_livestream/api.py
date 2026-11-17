@@ -110,7 +110,7 @@ class BirdBuddyWatcher:
     """Wraps pybirdbuddy and adds the watching mutations.
 
     Bird Buddy allows only one active watching session per account, and the
-    session mutations take no feederId. This class therefore serialises all
+    session mutations take no feederId. This class therefore serializes all
     access, tracks which feeder currently holds the session, and runs the
     keepalive.
     """
@@ -118,7 +118,7 @@ class BirdBuddyWatcher:
     def __init__(
         self, client: BirdBuddy, session: aiohttp.ClientSession | None = None
     ) -> None:
-        """Initialise the watcher."""
+        """Initialize the watcher."""
         self._client = client
         self._session = session
         self._lock = asyncio.Lock()
@@ -198,7 +198,7 @@ class BirdBuddyWatcher:
                     # Bird Buddy occasionally answers without a recognisable
                     # result type. Polling again clears it, so this is noted
                     # rather than treated as a failure.
-                    LOGGER.debug("Unrecognised watching response: %s", result)
+                    LOGGER.debug("Unrecognized watching response: %s", result)
                 else:
                     LOGGER.debug(
                         "watching %s / state=%s", typename, watching.get("state")
