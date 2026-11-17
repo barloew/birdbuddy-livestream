@@ -4,10 +4,10 @@
   "codeowners": ["@barloew"],
   "config_flow": true,
   "dependencies": ["stream"],
-  "documentation": "https://github.com/barloew/birdbuddy_livestream",
+  "documentation": "https://github.com/barloew/birdbuddy-livestream",
   "integration_type": "hub",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/barloew/birdbuddy_livestream/issues",
+  "issue_tracker": "https://github.com/barloew/birdbuddy-livestream/issues",
   "requirements": ["pybirdbuddy>=0.0.21"],
   "version": "1.3.1"
 }

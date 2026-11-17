@@ -71,7 +71,7 @@ Prefer to do it by hand?
 
 1. Open **HACS** in Home Assistant.
 2. Click the three dots in the top right, then **Custom repositories**.
-3. Paste `https://github.com/barloew/birdbuddy_livestream`, choose category
+3. Paste `https://github.com/barloew/birdbuddy-livestream`, choose category
    **Integration**, and click **Add**.
 4. Search for **Bird Buddy Livestream** and click **Download**.
 5. **Restart Home Assistant.**
@@ -355,12 +355,12 @@ Not affiliated with or endorsed by Bird Buddy.
 [my-ha-url]: https://my.home-assistant.io/redirect/hacs_repository/?owner=barloew&repository=birdbuddy_livestream&category=integration
 [hacs-badge]: https://img.shields.io/badge/HACS-Custom-41BDF5.svg
 [hacs-url]: https://github.com/hacs/integration
-[validate-badge]: https://github.com/barloew/birdbuddy_livestream/actions/workflows/validate.yml/badge.svg
-[validate-url]: https://github.com/barloew/birdbuddy_livestream/actions/workflows/validate.yml
-[release-badge]: https://img.shields.io/github/v/release/barloew/birdbuddy_livestream
-[release-url]: https://github.com/barloew/birdbuddy_livestream/releases
+[validate-badge]: https://github.com/barloew/birdbuddy-livestream/actions/workflows/validate.yml/badge.svg
+[validate-url]: https://github.com/barloew/birdbuddy-livestream/actions/workflows/validate.yml
+[release-badge]: https://img.shields.io/github/v/release/barloew/birdbuddy-livestream
+[release-url]: https://github.com/barloew/birdbuddy-livestream/releases
 [advanced]: docs/advanced.md
-[issues]: https://github.com/barloew/birdbuddy_livestream/issues
+[issues]: https://github.com/barloew/birdbuddy-livestream/issues
 [ha-birdbuddy]: https://github.com/jhansche/ha-birdbuddy
 [pybirdbuddy]: https://github.com/jhansche/pybirdbuddy
 [go2rtc]: https://github.com/AlexxIT/go2rtc
