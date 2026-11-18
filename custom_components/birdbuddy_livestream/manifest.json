@@ -1,6 +1,7 @@
 {
   "domain": "birdbuddy_livestream",
   "name": "Bird Buddy Livestream",
+  "categories": ["security_safety.cameras", "garden_plants"],
   "codeowners": ["@barloew"],
   "config_flow": true,
   "dependencies": ["stream"],
